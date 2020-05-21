@@ -538,7 +538,6 @@ def show_artist(artist_id):
   if not data:
     abort(404)
 
-  print(data.genres)
   # Query all list of past shows
   past_shows = Show.query.filter(Show.artist_id == artist_id, Show.datetime < datetime.now()).all()
   past_shows_count = len(past_shows)
