@@ -209,3 +209,27 @@ h2.monospace {
 .subtitle {
   opacity: 0.5;
 }
+.artist-actions {
+  padding: 21px;
+}
+.artist-actions #edit-button{
+  padding: 8px;
+  font-size: 18px;
+}
+.artist-actions #delete-button{
+  padding: 8px;
+  margin-left: 21px;
+  font-size: 18px;
+}
+.venue-actions {
+  padding: 21px;
+}
+.venue-actions #edit-button{
+  padding: 8px;
+  font-size: 18px;
+}
+.venue-actions #delete-button{
+  padding: 8px;
+  margin-left: 21px;
+  font-size: 18px;
+}

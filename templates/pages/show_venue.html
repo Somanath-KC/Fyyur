@@ -41,11 +41,45 @@
 			<i class="fas fa-moon"></i> Not currently seeking talent
 		</p>
 		{% endif %}
+
+		<div class="venue-actions">
+			<button id="edit-button" data-id="{{ venue.id }}">
+				<i class="fas fa-edit"></i>
+				Edit
+			</button>
+			<button id="delete-button" data-id="{{ venue.id }}" data-toggle="modal" data-target="#myModal">
+				<i class="fas fa-trash-alt"></i>
+				Delete
+			</button>
+
+			<!-- Modal -->
+			<div id="myModal" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+					<!-- Modal content-->
+					<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete {{ venue.name }}</h4>
+					</div>
+					<div class="modal-body">
+						<p>Are your sure to perform this action?</p>
+						<div class="alert alert-danger hidden" id="delete-error-message">
+							<strong>Error!</strong> while deleting Venue.
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" id="delete-button-confirm" data-id="{{ venue.id }}" >Yes</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ venue.image_link }}" alt="Venue Image" />
 	</div>
 </div>
+
 <section>
 	<h2 class="monospace">{{ venue.upcoming_shows_count }} Upcoming {% if venue.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
@@ -74,6 +108,26 @@
 		{% endfor %}
 	</div>
 </section>
+
+<script>
+	window.addEventListener('load', (event) => {
+      document.getElementById('edit-button').onclick = function(){
+		  location.href = location.origin + '/venues/' + this.dataset.id + '/edit'
+	  }
+	  document.getElementById('delete-button-confirm').onclick = function(){
+		 let request_body = {method: 'DELETE'};
+		 fetch('/venues/'+this.dataset.id, request_body).then(function(response){
+			return response.json()
+		 }).then(function(JSONResponse){
+			if(JSONResponse.status == 'ok'){
+				location.href = location.origin;
+			}else{
+				document.getElementById('delete-error-message').className += "show";
+			}
+		 })
+	  }
+    });
+</script>
 
 {% endblock %}
 

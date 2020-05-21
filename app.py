@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for, abort
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, abort, jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -303,7 +303,6 @@ def show_venue(venue_id):
   upcoming_shows = Show.query.filter(Show.venue_id == venue_id, Show.datetime > datetime.now()).all()
   upcoming_shows_count = len(upcoming_shows)
 
-  print(upcoming_shows[0].artist.name)
 
   data.past_shows = past_shows
   data.past_shows_count = past_shows_count
@@ -312,6 +311,7 @@ def show_venue(venue_id):
 
   return render_template('pages/show_venue.html', venue=data)
 
+
 #  Create Venue
 #  ----------------------------------------------------------------
 
@@ -319,6 +319,7 @@ def show_venue(venue_id):
 def create_venue_form():
   form = VenueForm()
   return render_template('forms/new_venue.html', form=form)
+
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
@@ -357,14 +358,33 @@ def create_venue_submission():
  
   return render_template('pages/home.html')
 
+
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
+  # TODO:[COMPLETED] Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+  # BONUS CHALLENGE:[COMPLETED] Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+
+  venue = Venue.query.get(venue_id)
+  error_flag = False
+
+  try:
+    db.session.delete(venue)
+    db.session.commit()
+  except Exception as e:
+    # Print Exception message for debugging
+    print(e)
+    db.session.rollback()
+    error_flag = True
+  finally:
+    db.session.close()
+
+  if error_flag:
+    return jsonify({'status': 'error'})
+  else:
+    return jsonify({'status': 'ok'})
 
 #  Artists
 #  ----------------------------------------------------------------
