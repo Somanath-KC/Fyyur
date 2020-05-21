@@ -61,7 +61,7 @@
                   type="search"
                   name="search_term"
                   placeholder="Find a venue"
-                  aria-label="Search" minlength="3" required>
+                  aria-label="Search" minlength="3" autocomplete="off" required>
               </form>
               {% endif %}
               {% if (request.endpoint == 'artists') or
@@ -72,7 +72,7 @@
                   type="search"
                   name="search_term"
                   placeholder="Find an artist"
-                  aria-label="Search" minlength="3" required>
+                  aria-label="Search" minlength="3" autocomplete="off" required>
               </form>
               {% endif %}
             </li>
