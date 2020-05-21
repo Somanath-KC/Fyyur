@@ -564,23 +564,57 @@ def shows():
   }]
   return render_template('pages/shows.html', shows=data)
 
+
 @app.route('/shows/create')
 def create_shows():
   # renders form. do not touch.
   form = ShowForm()
   return render_template('forms/new_show.html', form=form)
 
+
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
+  # TODO:[COMPLETED] insert form data as a new Show record in the db, instead
+  show_form =  ShowForm(meta={'csrf': False})
+  
+  if not show_form.validate_on_submit():
+    for error in show_form.errors.keys():
+      flash('Validation Error at '+ error, 'alert-warning')
 
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    return render_template('forms/new_show.html', form=show_form)
+  
+  # Checks the seeking status of Venues and Artists
+  artist_seeking_venue_status = db.session.query(Artist.seeking_venue).filter(Artist.id == show_form.artist_id.data).scalar()
+  venue_seeking_talent_status = db.session.query(Venue.seeking_talent).filter(Venue.id == show_form.venue_id.data).scalar()
+
+  if not artist_seeking_venue_status:
+    flash('Artist is currently not seeking venues.', 'alert-warning')
+    return render_template('forms/new_show.html', form=show_form)
+
+  if not venue_seeking_talent_status:
+    flash('Venue is currently not seeking talent.', 'alert-warning')
+    return render_template('forms/new_show.html', form=show_form)
+
+  try:
+    new_show = Show(**show_form.data)
+    db.session.add(new_show)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Show was successfully listed!', 'alert-success')
+  except Exception as e:
+    # Printing Exceptions for debugging
+    print(e)
+    db.session.rollback()
+    # TODO:[COMPLETED] on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Show could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('An error occurred. Show could not be listed.', 'alert-danger')
+  finally:
+    db.session.close()
+  
   return render_template('pages/home.html')
+
 
 @app.errorhandler(404)
 def not_found_error(error):

@@ -166,6 +166,7 @@ class ArtistForm(Form):
     )
 
 
+
 class ShowForm(Form):
     artist_id = StringField(
         'artist_id'
@@ -173,8 +174,8 @@ class ShowForm(Form):
     venue_id = StringField(
         'venue_id'
     )
-    start_time = DateTimeField(
-        'start_time',
+    datetime = DateTimeField(
+        'datetime',
         validators=[DataRequired()],
         default= datetime.today()
     )
