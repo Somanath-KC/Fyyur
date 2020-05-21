@@ -128,29 +128,56 @@ def index():
 
 @app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
+  # TODO:[COMPLETED] replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+
+  # data=[{
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "venues": [{
+  #     "id": 1,
+  #     "name": "The Musical Hop",
+  #     "num_upcoming_shows": 0,
+  #   }, {
+  #     "id": 3,
+  #     "name": "Park Square Live Music & Coffee",
+  #     "num_upcoming_shows": 1,
+  #   }]
+  # }, {
+  #   "city": "New York",
+  #   "state": "NY",
+  #   "venues": [{
+  #     "id": 2,
+  #     "name": "The Dueling Pianos Bar",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }]
+
+  data = []
+
+  count_feild = db.func.count(Venue.city)
+  cities_states = db.session.query(Venue.city, Venue.state, count_feild).group_by(Venue.city, Venue.state).order_by(count_feild).all()
+  
+
+  for item in cities_states[::-1]:
+    city_info = {
+        "city": item.city,
+        "state": item.state,
+        "venues" :[]
+      }
+
+    # Query to get all the venues from each city 
+    venues = Venue.query.filter(Venue.city==item.city, Venue.state == item.state).all()
+
+    # Grab all info from each info
+    for venue in venues:
+      city_info['venues'].append({
+            "id": venue.id,
+            "name": venue.name,
+            "num_upcoming_shows": Show.query.filter(Show.venue_id == venue.id, Show.datetime > datetime.now()).count()
+          })
+    data.append(city_info)
+
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
