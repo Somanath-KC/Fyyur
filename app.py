@@ -78,7 +78,21 @@ class Artist(db.Model):
     seeking_description = db.Column(db.String(256), nullable=True)
 
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+
+# TODO:[COMPLETED] Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+    __tablename__ = "Show"
+
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+    # Relationships
+    # Reference : https://stackoverflow.com/questions/44538911/flask-sqlalchemy-backref-function-and-backref-parameter
+    #             https://docs.sqlalchemy.org/en/13/orm/backref.html
+    #             https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
+    artist = db.relationship('Artist', backref=db.backref("shows", cascade="all,delete-orphan", lazy="noload"), lazy=True)
+    venue = db.relationship('Venue', backref=db.backref("shows", cascade="all,delete-orphan", lazy="noload"), lazy=True)
 
 #----------------------------------------------------------------------------#
 # Filters.
