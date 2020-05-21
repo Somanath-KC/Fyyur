@@ -42,10 +42,20 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
+    # Max Url length may range upto 2048 characters
+    # Reference: Alembic Column change detect ON
+    #            https://peterspython.com/en/blog/make-alembic-detect-column-type-changes-and-change-the-length-of-string-fields
+    image_link = db.Column(db.String(2048), 
+                           default="https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
+                          )
+    facebook_link = db.Column(db.String(2048))
+    # TODO:[COMPLETED] implement any missing fields, as a database migration using Flask-Migrate
+    genres = db.Column(db.ARRAY(db.String()))
+    website = db.Column(db.String(2048))
+    seeking_talent = db.Column(db.Boolean, nullable=False)
+    seeking_description = db.Column(db.String(256), nullable=True)
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
