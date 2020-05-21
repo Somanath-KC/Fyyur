@@ -262,14 +262,39 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  # TODO:[COMPLETED] insert form data as a new Venue record in the db, instead
+  # TODO:[COMPLETED] modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  form_data = request.form
+  venue_form = VenueForm(meta={'csrf': False})
+  
+  if not venue_form.validate_on_submit():
+    # Flashes all error messages to user
+    for error in venue_form.errors.keys():
+      flash('Validation error at '+ error, 'alert-warning')
+    
+    # This avoids user from re-entering the values for form.
+    return render_template('forms/new_venue.html', form=venue_form)
+
+  try:
+    # Assiging attributes using python dict
+    # Refrence: https://codereview.stackexchange.com/questions/171107/python-class-initialize-with-dict
+    new_venue = Venue(**venue_form.data)
+    db.session.add(new_venue)
+    db.session.commit()
+    # Flash on successful db insert
+    flash('Venue ' + new_venue.name + ' listed succesfully', 'alert-success')
+  except Exception as e:
+    # Print Exception message for debugging
+    print(e)
+    db.session.rollback()
+    # TODO:[COMPLETED] on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('Error in creating venue ' + form_data.get('name'), 'alert-danger')
+  finally:
+    db.session.close()
+ 
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
