@@ -91,8 +91,8 @@ class Show(db.Model):
     # Reference : https://stackoverflow.com/questions/44538911/flask-sqlalchemy-backref-function-and-backref-parameter
     #             https://docs.sqlalchemy.org/en/13/orm/backref.html
     #             https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
-    artist = db.relationship('Artist', backref=db.backref("shows", cascade="all,delete-orphan", lazy="noload"), lazy=True)
-    venue = db.relationship('Venue', backref=db.backref("shows", cascade="all,delete-orphan", lazy="noload"), lazy=True)
+    artist = db.relationship('Artist', backref=db.backref("shows", cascade="all,delete-orphan", lazy=True), lazy=True)
+    venue = db.relationship('Venue', backref=db.backref("shows", cascade="all,delete-orphan", lazy=True), lazy=True)
 
 #----------------------------------------------------------------------------#
 # Filters.
