@@ -478,16 +478,43 @@ def create_artist_form():
   form = ArtistForm()
   return render_template('forms/new_artist.html', form=form)
 
+
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  # TODO:[COMPLETED] insert form data as a new Venue record in the db, instead
+  # TODO:[COMPLETED] modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+  form_data = request.form
+  artist_form = ArtistForm(meta={'csrf': False})
+
+  if not artist_form.validate_on_submit():
+    # Flashes all error messages to user
+    for error in artist_form.errors.keys():
+      flash('Validation error at '+ error, 'alert-warning')
+    
+    # This avoids user from re-entering the values into form.
+    return render_template('forms/new_artist.html', form=artist_form)
+
+  try:
+    # Assiging attributes using python dict
+    # Refrence: https://codereview.stackexchange.com/questions/171107/python-class-initialize-with-dict
+    new_artist = Artist(**artist_form.data)
+    db.session.add(new_artist)
+    db.session.commit()
+    #  on successful db insert, flash success
+    flash('Artist ' + new_artist.name + ' listed succesfully', 'alert-success')
+  except Exception as e:
+    # Print Exception message for debugging
+    print(e)
+    db.session.rollback()
+    # TODO:[COMPLETED] on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('Error in creating artist ' + form_data.get('name'), 'alert-danger')
+  finally:
+    db.session.close()
+
   return render_template('pages/home.html')
 
 
