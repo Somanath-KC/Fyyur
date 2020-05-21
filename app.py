@@ -386,6 +386,29 @@ def delete_venue(venue_id):
   else:
     return jsonify({'status': 'ok'})
 
+
+@app.route('/artists/<artist_id>', methods=['DELETE'])
+def delete_artist(artist_id):
+
+  artist = Artist.query.get(artist_id)
+  error_flag = False
+
+  try:
+    db.session.delete(artist)
+    db.session.commit()
+  except Exception as e:
+    # Print Exception message for debugging
+    print(e)
+    db.session.rollback()
+    error_flag = True
+  finally:
+    db.session.close()
+
+  if error_flag:
+    return jsonify({'status': 'error'})
+  else:
+    return jsonify({'status': 'ok'})
+
 #  Artists
 #  ----------------------------------------------------------------
 @app.route('/artists')

@@ -38,9 +38,41 @@
 			<i class="fas fa-moon"></i> Not currently seeking performance venues
 		</p>
 		{% endif %}
+		<div class="artist-actions">
+			<button id="edit-button" data-id="{{ artist.id }}">
+				<i class="fas fa-edit"></i>
+				Edit
+			</button>
+			<button id="delete-button" data-id="{{ artist.id }}" data-toggle="modal" data-target="#myModal">
+				<i class="fas fa-trash-alt"></i>
+				Delete
+			</button>
+
+			<!-- Modal -->
+			<div id="myModal" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+					<!-- Modal content-->
+					<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete {{ artist.name }}</h4>
+					</div>
+					<div class="modal-body">
+						<p>Are your sure to perform this action?</p>
+						<div class="alert alert-danger hidden" id="delete-error-message">
+							<strong>Error!</strong> while deleting Venue.
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" id="delete-button-confirm" data-id="{{ artist.id }}" >Yes</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 	<div class="col-sm-6">
-		<img src="{{ artist.image_link }}" alt="Venue Image" />
+		<img src="{{ artist.image_link }}" alt="Artist Image" />
 	</div>
 </div>
 <section>
@@ -72,5 +104,24 @@
 	</div>
 </section>
 
+<script>
+	  window.addEventListener('load', (event) => {
+      document.getElementById('edit-button').onclick = function(){
+		  location.href = location.origin + '/artists/' + this.dataset.id + '/edit'
+	  }
+	  document.getElementById('delete-button-confirm').onclick = function(){
+		 let request_body = {method: 'DELETE'};
+		 fetch('/artists/'+this.dataset.id, request_body).then(function(response){
+			return response.json()
+		 }).then(function(JSONResponse){
+			if(JSONResponse.status == 'ok'){
+				location.href = location.origin;
+			}else{
+				document.getElementById('delete-error-message').className += "show";
+			}
+		 })
+	  }
+    });
+</script>
 {% endblock %}
 
