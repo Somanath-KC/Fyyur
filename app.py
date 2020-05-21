@@ -99,7 +99,13 @@ class Show(db.Model):
 #----------------------------------------------------------------------------#
 
 def format_datetime(value, format='medium'):
-  date = dateutil.parser.parse(value)
+  # parses the input values only if input value is string type.
+  # if value is str type the value will be parsed to datetime object.
+  if type(value) == type(" "):
+      date = dateutil.parser.parse(value)
+  else:
+    date = value
+
   if format == 'full':
       format="EEEE MMMM, d, y 'at' h:mma"
   elif format == 'medium':
