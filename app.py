@@ -560,27 +560,85 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
+  # form = ArtistForm()
+  # artist={
+  #   "id": 4,
+  #   "name": "Guns N Petals",
+  #   "genres": ["Rock n Roll"],
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "phone": "326-123-5000",
+  #   "website": "https://www.gunsnpetalsband.com",
+  #   "facebook_link": "https://www.facebook.com/GunsNPetals",
+  #   "seeking_venue": True,
+  #   "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
+  #   "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+  # }
+
+  # TODO:[COMPLETED] populate form with fields from artist with ID <artist_id>
+  artist_item = Artist.query.get(artist_id)
+
+  if not artist_item:
+    abort(404)
+
   artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+    "id": artist_item.id,
+    "name": artist_item.name,
+    "genres": artist_item.genres,
+    "city": artist_item.city,
+    "state": artist_item.state,
+    "phone": artist_item.phone,
+    "website": artist_item.website,
+    "facebook_link": artist_item.facebook_link,
+    "seeking_venue": artist_item.seeking_venue,
+    "seeking_description": artist_item.seeking_description,
+    "image_link": artist_item.image_link
   }
-  # TODO: populate form with fields from artist with ID <artist_id>
+
+  form = ArtistForm(**artist)
+
   return render_template('forms/edit_artist.html', form=form, artist=artist)
+
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-  # TODO: take values from the form submitted, and update existing
+  # TODO:[COMPLETED] take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+
+  form = ArtistForm(meta={'csrf': False})
+
+  if not form.validate_on_submit():
+    # Flashes all error messages to user
+    for error in form.errors.keys():
+      flash('Validation error at '+ error, 'alert-warning')
+    
+    # This avoids user from re-entering the values for form.
+    return redirect(url_for('edit_artist', artist_id=artist_id))
+
+  # Modifing the Venue that exists in the DB
+  artist = Artist.query.get(artist_id)
+
+  try:
+    artist.name = form.name.data 
+    artist.city = form.city.data
+    artist.state = form.state.data
+    artist.phone = form.phone.data
+    artist.image_link = form.image_link.data
+    artist.facebook_link = form.facebook_link.data
+    artist.genres = form.genres.data
+    artist.website = form.website.data
+    artist.seeking_venue = form.seeking_venue.data
+    artist.seeking_description = form.seeking_description.data
+
+    db.session.commit()
+    flash('Artist ' + artist.name + ' was successfully updated!', 'alert-success')
+  except Exception as e:
+    db.session.rollback()
+    # Print exception message for debugging
+    print(e)
+    flash('Something went wrong when updating the artist ' + artist.name, 'alert-danger')
+  finally:
+    db.session.close()
 
   return redirect(url_for('show_artist', artist_id=artist_id))
 
